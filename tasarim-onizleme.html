@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WayMate — Yol Arkadaşını Bul</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+        colors: {
+          brand: { 50:'#f0fdfa',100:'#ccfbf1',200:'#99f6e4',300:'#5eead4',400:'#2dd4bf',500:'#14b8a6',600:'#0d9488',700:'#0f766e',800:'#115e59',900:'#134e4a' },
+          ink: '#0f1c2e'
+        },
+        boxShadow: {
+          soft: '0 10px 40px -12px rgba(13,148,136,0.25)',
+          card: '0 4px 24px -8px rgba(15,28,46,0.12)',
+          float: '0 20px 60px -20px rgba(15,28,46,0.3)'
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family:'Plus Jakarta Sans',sans-serif; }
+  .gradient-brand { background: linear-gradient(135deg,#0d9488 0%,#14b8a6 45%,#22d3ee 100%); }
+  .gradient-mesh {
+    background:
+      radial-gradient(circle at 15% 20%, rgba(45,212,191,.35), transparent 40%),
+      radial-gradient(circle at 85% 10%, rgba(34,211,238,.3), transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(13,148,136,.25), transparent 50%),
+      linear-gradient(135deg,#0b3b38,#0f766e);
+  }
+  .glass { background: rgba(255,255,255,.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .text-gradient { background: linear-gradient(120deg,#0d9488,#22d3ee); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .reveal { opacity:0; transform: translateY(28px); transition: all .7s cubic-bezier(.16,1,.3,1); }
+  .reveal.in { opacity:1; transform: none; }
+  .float-anim { animation: float 6s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .float-anim-2 { animation: float 7s ease-in-out infinite 1s; }
+  .marquee { animation: scroll 30s linear infinite; }
+  @keyframes scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+  .blob { filter: blur(40px); }
+  .card-hover { transition: transform .35s cubic-bezier(.16,1,.3,1), box-shadow .35s; }
+  .card-hover:hover { transform: translateY(-8px); box-shadow: 0 24px 60px -24px rgba(13,148,136,.5); }
+  ::selection { background:#14b8a6; color:#fff; }
+  .faq-item[open] .faq-icon { transform: rotate(45deg); }
+  .faq-icon { transition: transform .3s; }
+  .nav-blur { background: rgba(255,255,255,.8); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+</style>
+</head>
+<body class="bg-white text-ink antialiased overflow-x-hidden">
+
+<!-- Üst duyuru şeridi -->
+<div class="gradient-brand text-white text-center text-sm py-2.5 px-4 font-medium">
+  🚗 Yeni nesil araç paylaşım platformu — kayıt ve kullanım <span class="font-bold">tamamen ücretsiz</span>.
+</div>
+
+<!-- NAVBAR -->
+<nav class="nav-blur sticky top-0 z-50 border-b border-gray-100">
+  <div class="max-w-7xl mx-auto px-5 h-[72px] flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5">
+      <div class="w-10 h-10 gradient-brand rounded-2xl grid place-items-center shadow-soft">
+        <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 0a2 2 0 00-2 2v6m2-8l-1 4m9-4a2 2 0 012 2v6m-2-8l1 4m1 0H5m14 0v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1m-8 2H6a1 1 0 01-1-1v-3"/></svg>
+      </div>
+      <span class="text-xl font-extrabold tracking-tight">Way<span class="text-brand-500">Mate</span></span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-600">
+      <a href="#nasil" class="hover:text-brand-600 transition">Nasıl Çalışır</a>
+      <a href="#ilanlar" class="hover:text-brand-600 transition">İlanlar</a>
+      <a href="#neden" class="hover:text-brand-600 transition">Neden WayMate</a>
+      <a href="#sss" class="hover:text-brand-600 transition">SSS</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <button class="hidden sm:flex items-center gap-1.5 text-sm font-semibold text-gray-600 border border-gray-200 rounded-xl px-3 py-2 hover:border-brand-300 transition">
+        🇹🇷 TR
+      </button>
+      <a href="/giris/" class="hidden sm:block text-sm font-semibold text-gray-700 hover:text-brand-600 transition px-2">Giriş Yap</a>
+      <a href="/kayit/" class="gradient-brand text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow-soft hover:shadow-float hover:-translate-y-0.5 transition">Ücretsiz Başla</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="relative gradient-mesh text-white overflow-hidden">
+  <div class="absolute top-20 -left-20 w-72 h-72 bg-brand-300/30 rounded-full blob"></div>
+  <div class="absolute bottom-0 right-0 w-96 h-96 bg-cyan-300/20 rounded-full blob"></div>
+
+  <div class="relative max-w-7xl mx-auto px-5 pt-16 pb-24 lg:pt-24 lg:pb-32 grid lg:grid-cols-2 gap-12 items-center">
+    <!-- Sol metin -->
+    <div class="reveal">
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium mb-6">
+        <span class="w-2 h-2 bg-emerald-300 rounded-full animate-pulse"></span>
+        Akıllı rota eşleştirmesiyle çalışan yeni platform
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-[1.05] tracking-tight">
+        Evden işe<br>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-200 to-cyan-200">yalnız gitme.</span>
+      </h1>
+      <p class="mt-6 text-lg text-teal-50/90 max-w-md leading-relaxed">
+        Aynı güzergahı kullanan komşularınla eşleş. Yakıt masrafını böl, trafiğin stresini azalt, yolculuğu keyifli hale getir.
+      </p>
+
+      <!-- Arama kartı -->
+      <div class="mt-8 glass rounded-3xl p-2.5 shadow-float max-w-lg">
+        <div class="grid sm:grid-cols-2 gap-2">
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">●</span>
+            <input type="text" placeholder="Nereden? (ev adresin)" class="w-full bg-gray-50 rounded-2xl pl-9 pr-4 py-3.5 text-sm text-ink placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400">
+          </div>
+          <div class="relative">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-red-400">●</span>
+            <input type="text" placeholder="Nereye? (iş adresin)" class="w-full bg-gray-50 rounded-2xl pl-9 pr-4 py-3.5 text-sm text-ink placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400">
+          </div>
+        </div>
+        <a href="/ilanlar/" class="mt-2 w-full gradient-brand text-white font-semibold py-4 rounded-2xl shadow-soft hover:shadow-float transition flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
+          Yol Arkadaşı Bul
+        </a>
+      </div>
+
+      <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-teal-50/80">
+        <span class="flex items-center gap-2">🔒 Onaylı profiller</span>
+        <span class="flex items-center gap-2">💬 Güvenli mesajlaşma</span>
+        <span class="flex items-center gap-2">🗺️ Rota bazlı eşleştirme</span>
+      </div>
+    </div>
+
+    <!-- Sağ görsel kolaj -->
+    <div class="relative reveal hidden lg:block">
+      <div class="relative rounded-[2rem] overflow-hidden shadow-float float-anim h-[460px] bg-gradient-to-br from-brand-600 via-brand-500 to-cyan-400">
+        <!-- Rota illüstrasyonu (fotoğraf yerine temiz grafik) -->
+        <svg class="absolute inset-0 w-full h-full opacity-90" viewBox="0 0 400 460" fill="none" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M40 0H0V40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            </pattern>
+          </defs>
+          <rect width="400" height="460" fill="url(#grid)"/>
+          <!-- yol/rota çizgisi -->
+          <path d="M70 400 C 70 300, 330 280, 330 180 S 120 80, 200 40" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 16"/>
+          <!-- başlangıç noktası -->
+          <circle cx="70" cy="400" r="14" fill="#22c55e" stroke="#fff" stroke-width="4"/>
+          <!-- bitiş noktası (pin) -->
+          <circle cx="200" cy="40" r="14" fill="#ef4444" stroke="#fff" stroke-width="4"/>
+          <!-- araç ikonu (yol ortasında) -->
+          <g transform="translate(312,176)">
+            <circle r="26" fill="#fff"/>
+            <path transform="translate(-13,-13) scale(1.1)" d="M8 7h8m-8 0a2 2 0 00-2 2v6m2-8l-1 4m9-4a2 2 0 012 2v6m-2-8l1 4m1 0H5m14 0v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1m-8 2H6a1 1 0 01-1-1v-3" fill="none" stroke="#0d9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+        <div class="absolute bottom-5 left-5 text-white">
+          <p class="text-2xl font-extrabold drop-shadow">Kadıköy → Levent</p>
+          <p class="text-teal-50/90 text-sm">Her sabah aynı yol, artık birlikte</p>
+        </div>
+      </div>
+      <!-- Yüzen kart 1 -->
+      <div class="absolute -left-8 top-12 bg-white rounded-2xl shadow-float p-4 w-56 float-anim-2">
+        <div class="flex items-center gap-3">
+          <img class="w-11 h-11 rounded-full" src="https://randomuser.me/api/portraits/men/52.jpg" alt="">
+          <div>
+            <p class="font-bold text-ink text-sm">Mehmet Y.</p>
+            <p class="text-xs text-gray-400">Onaylı üye · Kadıköy</p>
+          </div>
+        </div>
+        <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
+          <span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Kadıköy
+          <span class="flex-1 border-t border-dashed border-gray-300"></span>
+          <span class="w-2 h-2 bg-red-400 rounded-full"></span> Levent
+        </div>
+        <div class="mt-3 flex items-center justify-between">
+          <span class="text-xs text-gray-400">Sabah 07:30</span>
+          <span class="font-extrabold text-brand-600">₺1.100<span class="text-xs font-medium text-gray-400">/ay</span></span>
+        </div>
+      </div>
+      <!-- Yüzen kart 2 -->
+      <div class="absolute -right-6 bottom-10 bg-white rounded-2xl shadow-float p-4 w-48 float-anim">
+        <div class="flex items-center gap-2 text-brand-600 font-bold text-sm mb-1">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          Eşleşme bulundu!
+        </div>
+        <p class="text-xs text-gray-500">Güzergahının %94'ü uyumlu</p>
+        <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+          <div class="h-full w-[94%] gradient-brand rounded-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dalga ayraç -->
+  <div class="relative">
+    <svg viewBox="0 0 1440 80" class="w-full block" preserveAspectRatio="none"><path fill="#ffffff" d="M0,40 C360,90 1080,-10 1440,40 L1440,80 L0,80 Z"></path></svg>
+  </div>
+</header>
+
+<!-- SİSTEM ÖZELLİK ŞERİDİ -->
+<section class="py-12 bg-white border-b border-gray-50">
+  <div class="max-w-7xl mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div class="reveal flex items-start gap-3">
+      <span class="text-2xl">🗺️</span>
+      <div><p class="font-bold text-ink">Rota bazlı eşleştirme</p><p class="text-sm text-gray-500 mt-0.5">Sadece yol üstündeki ilanları gösterir</p></div>
+    </div>
+    <div class="reveal flex items-start gap-3" style="transition-delay:.05s">
+      <span class="text-2xl">🔒</span>
+      <div><p class="font-bold text-ink">Güvenli iletişim</p><p class="text-sm text-gray-500 mt-0.5">Onaylı profiller, kapalı mesajlaşma</p></div>
+    </div>
+    <div class="reveal flex items-start gap-3" style="transition-delay:.1s">
+      <span class="text-2xl">💸</span>
+      <div><p class="font-bold text-ink">Ücretsiz kullanım</p><p class="text-sm text-gray-500 mt-0.5">Kayıt ve eşleşme tamamen bedava</p></div>
+    </div>
+    <div class="reveal flex items-start gap-3" style="transition-delay:.15s">
+      <span class="text-2xl">📍</span>
+      <div><p class="font-bold text-ink">Tüm Türkiye</p><p class="text-sm text-gray-500 mt-0.5">81 ilde adres bazlı arama</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- NASIL ÇALIŞIR -->
+<section id="nasil" class="py-24 bg-gradient-to-b from-white to-brand-50/40">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center max-w-2xl mx-auto reveal">
+      <span class="text-brand-600 font-bold text-sm uppercase tracking-wider">Basit & Hızlı</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">Üç adımda yola çık</h2>
+      <p class="text-gray-500 mt-4 text-lg">Dakikalar içinde güzergahına uygun yol arkadaşını bul.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 mt-16">
+      <div class="reveal card-hover bg-white rounded-3xl p-8 shadow-card border border-gray-50">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-400 to-cyan-400 grid place-items-center shadow-soft mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <span class="text-5xl font-extrabold text-brand-100">01</span>
+        <h3 class="text-xl font-bold mt-2">Güzergahını gir</h3>
+        <p class="text-gray-500 mt-2 leading-relaxed">Ev ve iş adresini gir. Harita üzerinde rotanı saniyeler içinde oluşturalım.</p>
+      </div>
+      <div class="reveal card-hover bg-white rounded-3xl p-8 shadow-card border border-gray-50" style="transition-delay:.1s">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-400 grid place-items-center shadow-soft mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/></svg>
+        </div>
+        <span class="text-5xl font-extrabold text-brand-100">02</span>
+        <h3 class="text-xl font-bold mt-2">Eşleş & mesajlaş</h3>
+        <p class="text-gray-500 mt-2 leading-relaxed">Rotana ve saatine uyan sürücülerle eşleş, güvenli sohbet üzerinden anlaş.</p>
+      </div>
+      <div class="reveal card-hover bg-white rounded-3xl p-8 shadow-card border border-gray-50" style="transition-delay:.2s">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-400 to-brand-600 grid place-items-center shadow-soft mb-6">
+          <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        </div>
+        <span class="text-5xl font-extrabold text-brand-100">03</span>
+        <h3 class="text-xl font-bold mt-2">Birlikte git, tasarruf et</h3>
+        <p class="text-gray-500 mt-2 leading-relaxed">Masrafı paylaş, her ay yüzlerce lira cepte kalsın. Hem de çevreye katkı.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ÖNE ÇIKAN İLANLAR -->
+<section id="ilanlar" class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 reveal">
+      <div>
+        <span class="text-brand-600 font-bold text-sm uppercase tracking-wider">Örnek ilanlar</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">İlanlar böyle görünür</h2>
+        <p class="text-gray-500 mt-2 text-sm">Aşağıdaki kartlar, bir ilanın sistemde nasıl listelendiğini gösterir.</p>
+      </div>
+      <a href="/ilanlar/" class="text-brand-600 font-semibold hover:gap-3 flex items-center gap-2 transition-all">Tümünü gör
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </a>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 mt-12">
+      <!-- Kart 1 -->
+      <div class="reveal card-hover bg-white rounded-3xl border border-gray-100 shadow-card overflow-hidden">
+        <div class="h-32 relative overflow-hidden bg-gradient-to-br from-brand-400 to-cyan-400">
+          <svg class="absolute -right-4 -bottom-3 w-28 h-28 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 0a2 2 0 00-2 2v6m11-8a2 2 0 012 2v6M5 15h14m-2 0v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1M9 18v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"/></svg>
+          <span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-bold px-3 py-1 rounded-full text-brand-700">İstanbul</span>
+          <span class="absolute top-3 right-3 bg-white text-emerald-600 text-xs font-bold px-3 py-1 rounded-full shadow">3 koltuk</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-3 -mt-10 relative">
+            <img class="w-14 h-14 rounded-2xl border-4 border-white object-cover shadow" src="https://randomuser.me/api/portraits/men/52.jpg" alt="">
+            <div class="pt-7">
+              <p class="font-bold">Mehmet Y.</p>
+              <p class="text-xs text-gray-400">Onaylı üye</p>
+            </div>
+          </div>
+          <div class="mt-4 space-y-2 text-sm">
+            <p class="flex items-center gap-2 text-gray-600"><span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Kadıköy, Moda</p>
+            <p class="flex items-center gap-2 text-gray-600"><span class="w-2 h-2 bg-red-400 rounded-full"></span> Levent, Metrocity</p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="text-xs text-gray-400">🕖 07:30 · 🕔 18:00</div>
+            <div class="text-right"><span class="text-xl font-extrabold text-brand-600">₺1.100</span><span class="text-xs text-gray-400">/ay</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Kart 2 -->
+      <div class="reveal card-hover bg-white rounded-3xl border border-gray-100 shadow-card overflow-hidden" style="transition-delay:.1s">
+        <div class="h-32 relative overflow-hidden bg-gradient-to-br from-cyan-400 to-brand-500">
+          <svg class="absolute -right-4 -bottom-3 w-28 h-28 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 0a2 2 0 00-2 2v6m11-8a2 2 0 012 2v6M5 15h14m-2 0v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1M9 18v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"/></svg>
+          <span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-bold px-3 py-1 rounded-full text-brand-700">İstanbul</span>
+          <span class="absolute top-3 right-3 bg-white text-emerald-600 text-xs font-bold px-3 py-1 rounded-full shadow">1 koltuk</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-3 -mt-10 relative">
+            <img class="w-14 h-14 rounded-2xl border-4 border-white object-cover shadow" src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+            <div class="pt-7">
+              <p class="font-bold">Ayşe K.</p>
+              <p class="text-xs text-gray-400">Onaylı üye</p>
+            </div>
+          </div>
+          <div class="mt-4 space-y-2 text-sm">
+            <p class="flex items-center gap-2 text-gray-600"><span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Üsküdar, Kısıklı</p>
+            <p class="flex items-center gap-2 text-gray-600"><span class="w-2 h-2 bg-red-400 rounded-full"></span> Maslak, 42 Plaza</p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="text-xs text-gray-400">🕗 08:00 · 🕔 17:30</div>
+            <div class="text-right"><span class="text-xl font-extrabold text-brand-600">₺1.300</span><span class="text-xs text-gray-400">/ay</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Kart 3 -->
+      <div class="reveal card-hover bg-white rounded-3xl border border-gray-100 shadow-card overflow-hidden" style="transition-delay:.2s">
+        <div class="h-32 relative overflow-hidden bg-gradient-to-br from-teal-500 to-emerald-400">
+          <svg class="absolute -right-4 -bottom-3 w-28 h-28 text-white/20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 0a2 2 0 00-2 2v6m11-8a2 2 0 012 2v6M5 15h14m-2 0v3a1 1 0 01-1 1h-1a1 1 0 01-1-1v-1M9 18v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3"/></svg>
+          <span class="absolute top-3 left-3 bg-white/90 backdrop-blur text-xs font-bold px-3 py-1 rounded-full text-brand-700">Ankara</span>
+          <span class="absolute top-3 right-3 bg-white text-emerald-600 text-xs font-bold px-3 py-1 rounded-full shadow">2 koltuk</span>
+        </div>
+        <div class="p-5">
+          <div class="flex items-center gap-3 -mt-10 relative">
+            <img class="w-14 h-14 rounded-2xl border-4 border-white object-cover shadow" src="https://randomuser.me/api/portraits/men/76.jpg" alt="">
+            <div class="pt-7">
+              <p class="font-bold">Burak T.</p>
+              <p class="text-xs text-gray-400">Onaylı üye</p>
+            </div>
+          </div>
+          <div class="mt-4 space-y-2 text-sm">
+            <p class="flex items-center gap-2 text-gray-600"><span class="w-2 h-2 bg-emerald-400 rounded-full"></span> Çankaya</p>
+            <p class="flex items-center gap-2 text-gray-600"><span class="w-2 h-2 bg-red-400 rounded-full"></span> Söğütözü</p>
+          </div>
+          <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+            <div class="text-xs text-gray-400">🕢 07:45 · 🕔 18:15</div>
+            <div class="text-right"><span class="text-xl font-extrabold text-brand-600">₺950</span><span class="text-xs text-gray-400">/ay</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEDEN WAYMATE (görsel + özellik) -->
+<section id="neden" class="py-24 gradient-mesh text-white relative overflow-hidden">
+  <div class="absolute -top-20 right-1/3 w-72 h-72 bg-cyan-300/20 rounded-full blob"></div>
+  <div class="max-w-7xl mx-auto px-5 grid lg:grid-cols-2 gap-16 items-center relative">
+    <div class="reveal">
+      <div class="rounded-[2rem] shadow-float w-full h-[420px] bg-gradient-to-br from-brand-600 to-cyan-500 relative overflow-hidden grid place-items-center">
+        <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle at 20% 30%, #fff 2px, transparent 2px), radial-gradient(circle at 70% 60%, #fff 2px, transparent 2px); background-size: 60px 60px;"></div>
+        <div class="relative text-center text-white px-8">
+          <div class="text-6xl mb-4">🚗💨</div>
+          <p class="text-2xl font-extrabold">Birlikte daha keyifli</p>
+          <p class="text-teal-50/90 mt-2 max-w-xs mx-auto">Aynı yolu paylaş, masrafı böl, çevreyi koru.</p>
+          <div class="mt-6 flex items-center justify-center gap-3">
+            <img class="w-12 h-12 rounded-full border-2 border-white/50" src="https://randomuser.me/api/portraits/women/68.jpg" alt="">
+            <img class="w-12 h-12 rounded-full border-2 border-white/50 -ml-5" src="https://randomuser.me/api/portraits/men/52.jpg" alt="">
+            <img class="w-12 h-12 rounded-full border-2 border-white/50 -ml-5" src="https://randomuser.me/api/portraits/women/44.jpg" alt="">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal">
+      <span class="text-emerald-200 font-bold text-sm uppercase tracking-wider">Neden WayMate?</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight leading-tight">Daha az masraf,<br>daha çok keyif.</h2>
+      <div class="mt-8 space-y-5">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 grid place-items-center shrink-0">💰</div>
+          <div><p class="font-bold text-lg">Yakıt masrafını böl</p><p class="text-teal-50/80 text-sm mt-1">Günlük gidip-gelme masrafını paylaş, ayda yüzlerce lira tasarruf et.</p></div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 grid place-items-center shrink-0">🌍</div>
+          <div><p class="font-bold text-lg">Trafiği & emisyonu azalt</p><p class="text-teal-50/80 text-sm mt-1">Daha az araç = daha az trafik, daha temiz hava. Çevreye katkıda bulun.</p></div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 grid place-items-center shrink-0">🔒</div>
+          <div><p class="font-bold text-lg">Güvenli & onaylı</p><p class="text-teal-50/80 text-sm mt-1">Kimlik doğrulamalı profiller, kapalı mesajlaşma, karşılıklı puanlama.</p></div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 grid place-items-center shrink-0">🤝</div>
+          <div><p class="font-bold text-lg">Yeni insanlar tanı</p><p class="text-teal-50/80 text-sm mt-1">Aynı semtten, aynı işyerinden komşularınla tanış, yolculuğu sosyalleştir.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KİMLER İÇİN / SENARYOLAR -->
+<section class="py-24 bg-white">
+  <div class="max-w-7xl mx-auto px-5">
+    <div class="text-center max-w-2xl mx-auto reveal">
+      <span class="text-brand-600 font-bold text-sm uppercase tracking-wider">Kimler için?</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">İki tarafı da buluşturur</h2>
+      <p class="text-gray-500 mt-4 text-lg">İster aracın olsun, ister araç arıyor ol — WayMate ikisini de aynı güzergahta eşleştirir.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 mt-14">
+      <!-- Araç sahibi -->
+      <div class="reveal rounded-3xl p-8 bg-gradient-to-br from-brand-50 to-cyan-50 border border-brand-100/60">
+        <div class="w-14 h-14 rounded-2xl gradient-brand grid place-items-center shadow-soft text-2xl">🚗</div>
+        <h3 class="text-xl font-bold mt-5">Aracı olan</h3>
+        <p class="text-gray-500 mt-2 leading-relaxed">Her gün tek başına gidiyorsun, koltukların boş. İlan ver; ev–iş güzergahını, saatlerini ve aylık ücreti belirle.</p>
+        <ul class="mt-5 space-y-2.5 text-sm text-gray-600">
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Rotanı haritada otomatik çiz</li>
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Yol üstü sapma mesafesini ayarla</li>
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Esneklik durumunu belirt (ör. ayda 3-5 gün)</li>
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Masrafı paylaş, koltukları değerlendir</li>
+        </ul>
+      </div>
+      <!-- Araç arayan -->
+      <div class="reveal rounded-3xl p-8 bg-gradient-to-br from-cyan-50 to-brand-50 border border-brand-100/60" style="transition-delay:.1s">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-400 to-brand-500 grid place-items-center shadow-soft text-2xl">🧍</div>
+        <h3 class="text-xl font-bold mt-5">Araç arayan</h3>
+        <p class="text-gray-500 mt-2 leading-relaxed">Toplu taşımayla uğraşmak istemiyorsun. Ev ve iş adresini gir; güzergahına uygun sürücüleri anında listele.</p>
+        <ul class="mt-5 space-y-2.5 text-sm text-gray-600">
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Sadece rotana uyan ilanları gör</li>
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Kalkış saatine göre filtrele</li>
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> Sürücüyle güvenli mesajlaş</li>
+          <li class="flex items-center gap-2"><span class="text-brand-500">✓</span> İlan yoksa bildirim kur, çıkınca haber al</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Akıllı eşleştirme açıklaması -->
+    <div class="reveal mt-8 rounded-3xl bg-ink text-white p-8 sm:p-10 grid md:grid-cols-[1.2fr_1fr] gap-8 items-center overflow-hidden relative">
+      <div class="absolute -right-16 -bottom-16 w-64 h-64 bg-brand-500/20 rounded-full blob"></div>
+      <div class="relative">
+        <span class="text-brand-300 font-bold text-sm uppercase tracking-wider">Nasıl eşleştiriyor?</span>
+        <h3 class="text-2xl font-bold mt-3">Sadece "yakın" değil, gerçekten "yol üstünde"</h3>
+        <p class="text-gray-300 mt-3 leading-relaxed text-sm">
+          WayMate, sürücünün ev–iş rotasını harita üzerinden hesaplar ve senin ev/iş noktalarının bu rotaya olan
+          uzaklığını ölçer. Böylece sürücüyü hiç saptırmayan, gerçekten aynı yolu kullanan eşleşmeler önerilir —
+          ters yöndeki ya da çok uzaktaki ilanlar otomatik elenir.
+        </p>
+      </div>
+      <div class="relative bg-white/5 border border-white/10 rounded-2xl p-5">
+        <div class="flex items-center gap-2 text-sm"><span class="w-2.5 h-2.5 bg-emerald-400 rounded-full"></span> Sürücü rotası çiziliyor</div>
+        <div class="my-3 ml-1 border-l-2 border-dashed border-white/20 h-6"></div>
+        <div class="flex items-center gap-2 text-sm"><span class="w-2.5 h-2.5 bg-cyan-300 rounded-full"></span> Senin noktaların rotaya göre ölçülüyor</div>
+        <div class="mt-4 bg-white/10 rounded-xl p-3">
+          <div class="flex items-center justify-between text-xs mb-1.5"><span>Güzergah uyumu</span><span class="font-bold text-emerald-300">Yüksek</span></div>
+          <div class="h-2 bg-white/10 rounded-full overflow-hidden"><div class="h-full w-[88%] gradient-brand rounded-full"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SSS -->
+<section id="sss" class="py-24 bg-gradient-to-b from-brand-50/40 to-white">
+  <div class="max-w-3xl mx-auto px-5">
+    <div class="text-center reveal">
+      <span class="text-brand-600 font-bold text-sm uppercase tracking-wider">Merak edilenler</span>
+      <h2 class="text-3xl sm:text-4xl font-extrabold mt-3 tracking-tight">Sıkça sorulan sorular</h2>
+    </div>
+    <div class="mt-12 space-y-4">
+      <details class="faq-item reveal bg-white rounded-2xl border border-gray-100 shadow-card p-5 group" open>
+        <summary class="flex items-center justify-between cursor-pointer font-semibold list-none">WayMate ücretli mi?
+          <span class="faq-icon text-brand-500 text-2xl font-light">+</span></summary>
+        <p class="mt-3 text-gray-500 text-sm leading-relaxed">Hayır, kayıt ve kullanım tamamen ücretsizdir. Sadece yol arkadaşınla anlaştığın yolculuk ücretini paylaşırsın.</p>
+      </details>
+      <details class="faq-item reveal bg-white rounded-2xl border border-gray-100 shadow-card p-5">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold list-none">Eşleştirme nasıl çalışıyor?
+          <span class="faq-icon text-brand-500 text-2xl font-light">+</span></summary>
+        <p class="mt-3 text-gray-500 text-sm leading-relaxed">Ev ve iş adresini girdiğinde sistem rotanı hesaplar ve güzergahı seninkiyle örtüşen sürücüleri otomatik listeler. Sadece "yol üstündeki" ilanlar gösterilir.</p>
+      </details>
+      <details class="faq-item reveal bg-white rounded-2xl border border-gray-100 shadow-card p-5">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold list-none">Güvenli mi?
+          <span class="faq-icon text-brand-500 text-2xl font-light">+</span></summary>
+        <p class="mt-3 text-gray-500 text-sm leading-relaxed">Profiller kimlik doğrulamalıdır. İletişim bilgilerin, sen onaylamadan kimseyle paylaşılmaz. Yolculuk sonrası karşılıklı puanlama ile güven topluluğu oluşur.</p>
+      </details>
+      <details class="faq-item reveal bg-white rounded-2xl border border-gray-100 shadow-card p-5">
+        <summary class="flex items-center justify-between cursor-pointer font-semibold list-none">Aracım yok, yine de kullanabilir miyim?
+          <span class="faq-icon text-brand-500 text-2xl font-light">+</span></summary>
+        <p class="mt-3 text-gray-500 text-sm leading-relaxed">Elbette! "Araç arayan" olarak kayıt ol, güzergahına uygun sürücüleri bul ve onlarla iletişime geç.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-20 px-5">
+  <div class="max-w-5xl mx-auto gradient-brand rounded-[2.5rem] p-10 sm:p-16 text-center text-white relative overflow-hidden shadow-float reveal">
+    <div class="absolute -top-10 -right-10 w-48 h-48 bg-white/10 rounded-full blob"></div>
+    <div class="absolute -bottom-12 -left-8 w-56 h-56 bg-cyan-300/20 rounded-full blob"></div>
+    <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight relative">Bugün yola çıkmaya hazır mısın?</h2>
+    <p class="mt-4 text-teal-50/90 text-lg max-w-xl mx-auto relative">Ücretsiz kayıt ol, saniyeler içinde yol arkadaşını bul ya da ilanını ver.</p>
+    <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center relative">
+      <a href="/ilanlar/" class="bg-white text-brand-700 font-bold px-8 py-4 rounded-2xl shadow-lg hover:-translate-y-0.5 transition">🚗 Araç Bul</a>
+      <a href="/ilan-olustur/" class="bg-ink/20 border border-white/30 text-white font-bold px-8 py-4 rounded-2xl hover:bg-ink/30 transition">+ İlan Ver</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="bg-ink text-gray-400 pt-16 pb-8">
+  <div class="max-w-7xl mx-auto px-5 grid md:grid-cols-5 gap-10">
+    <div class="md:col-span-2">
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-9 h-9 gradient-brand rounded-xl grid place-items-center">
+          <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h8m-8 0a2 2 0 00-2 2v6m11-8a2 2 0 012 2v6M5 15h14"/></svg>
+        </div>
+        <span class="text-xl font-extrabold text-white">Way<span class="text-brand-400">Mate</span></span>
+      </div>
+      <p class="text-sm leading-relaxed max-w-xs">Her gün aynı yolu kullananları buluşturan akıllı araç paylaşım platformu.</p>
+      <div class="flex gap-3 mt-5">
+        <a href="#" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-brand-500 grid place-items-center transition">𝕏</a>
+        <a href="#" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-brand-500 grid place-items-center transition">f</a>
+        <a href="#" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-brand-500 grid place-items-center transition">in</a>
+        <a href="#" class="w-9 h-9 rounded-xl bg-white/5 hover:bg-brand-500 grid place-items-center transition">◎</a>
+      </div>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-4 text-sm">Platform</h4>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="/ilanlar/" class="hover:text-brand-400 transition">Araç Bul</a></li>
+        <li><a href="/ilan-olustur/" class="hover:text-brand-400 transition">İlan Ver</a></li>
+        <li><a href="#nasil" class="hover:text-brand-400 transition">Nasıl Çalışır</a></li>
+        <li><a href="/kayit/" class="hover:text-brand-400 transition">Üye Ol</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-4 text-sm">Şirket</h4>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="#" class="hover:text-brand-400 transition">Hakkımızda</a></li>
+        <li><a href="#" class="hover:text-brand-400 transition">İletişim</a></li>
+        <li><a href="#" class="hover:text-brand-400 transition">Kariyer</a></li>
+        <li><a href="#" class="hover:text-brand-400 transition">Blog</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="text-white font-bold mb-4 text-sm">Yasal</h4>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="/sozlesme/" class="hover:text-brand-400 transition">Kullanıcı Sözleşmesi</a></li>
+        <li><a href="/sozlesme/" class="hover:text-brand-400 transition">Gizlilik</a></li>
+        <li><a href="/sozlesme/" class="hover:text-brand-400 transition">KVKK</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto px-5 mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+    <p>© 2026 WayMate. Tüm hakları saklıdır.</p>
+    <p>waymate.com.tr · ❤️ ile Türkiye'de yapıldı</p>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Sayaç animasyonu
+  const counters = document.querySelectorAll('[data-count]');
+  const cio = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target; const target = +el.dataset.count; let cur = 0;
+      const step = Math.ceil(target / 60);
+      const t = setInterval(() => {
+        cur += step;
+        if (cur >= target) { cur = target; clearInterval(t); }
+        el.textContent = cur.toLocaleString('tr-TR') + (target>=1000?'+':'');
+      }, 24);
+      cio.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => cio.observe(c));
+</script>
+</body>
+</html>

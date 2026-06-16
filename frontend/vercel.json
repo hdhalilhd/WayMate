@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "env": {
+    "NEXT_PUBLIC_API_URL": "@api_url",
+    "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY": "@google_maps_key",
+    "NEXT_PUBLIC_GOOGLE_CLIENT_ID": "@google_client_id"
+  }
+}

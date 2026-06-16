@@ -1,0 +1,43 @@
+# Render.com Blueprint — backend (.NET) otomatik deploy
+# Render hesabında: New → Blueprint → bu repoyu seç
+services:
+  - type: web
+    name: waymate-api
+    runtime: docker
+    dockerfilePath: ./backend/YolArkadashim.API/Dockerfile
+    dockerContext: ./backend/YolArkadashim.API
+    plan: free
+    region: frankfurt
+    healthCheckPath: /health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Aşağıdakiler Render panelinden elle girilecek (sync:false = repoda saklanmaz)
+      - key: ConnectionStrings__DefaultConnection
+        sync: false   # Supabase connection string
+      - key: Jwt__Key
+        sync: false   # güçlü secret
+      - key: Jwt__Issuer
+        value: WayMate
+      - key: Jwt__Audience
+        value: WayMate
+      - key: Google__ClientId
+        sync: false
+      - key: GoogleMaps__ApiKey
+        sync: false
+      - key: App__BaseUrl
+        value: https://www.waymate.com.tr
+      - key: Cors__AllowedOrigins
+        value: https://www.waymate.com.tr,https://waymate.com.tr
+      - key: Smtp__Host
+        value: smtp.gmail.com
+      - key: Smtp__Port
+        value: "587"
+      - key: Smtp__Username
+        sync: false
+      - key: Smtp__Password
+        sync: false
+      - key: Smtp__FromName
+        value: WayMate
+      - key: Smtp__FromEmail
+        sync: false

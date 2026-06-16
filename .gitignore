@@ -1,0 +1,36 @@
+# .NET
+bin/
+obj/
+*.user
+appsettings.Production.json
+appsettings.Local.json
+appsettings.Development.json
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
+# Ortam değişkenleri (sırlar)
+.env
+.env.local
+.env*.local
+
+# Yerel PostGIS binary'leri (repoya gerek yok, çok büyük)
+postgis-bin/
+
+# Veri/şema dökümleri (gizli veri içerebilir)
+supabase_data.sql
+
+# Loglar
+*.log
+pg.log
+
+# IDE
+.vs/
+.idea/
+*.swp
+.DS_Store
