@@ -102,7 +102,7 @@ public class MatchRequestsController(
     public async Task<ActionResult<MatchRequestDto>> Accept(Guid id)
     {
         var match = await db.MatchRequests
-            .Include(m => m.Listing)
+            .Include(m => m.Listing).ThenInclude(l => l.User)
             .Include(m => m.Rider)
             .Include(m => m.Conversation)
             .FirstOrDefaultAsync(m => m.Id == id && m.Listing.UserId == CurrentUserId);
@@ -120,6 +120,7 @@ public class MatchRequestsController(
         };
 
         db.Conversations.Add(conversation);
+        match.Conversation = conversation;
         await db.SaveChangesAsync();
 
         // İlk mesajı varsa konuşmaya ekle
