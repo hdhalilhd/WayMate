@@ -17,6 +17,7 @@ export interface ListingDto {
   driverName: string;
   driverPhoto?: string;
   city: string;
+  district?: string;
   driverEmailVerified: boolean;
   driverTcVerified: boolean;
   homeLocation: LocationDto;
