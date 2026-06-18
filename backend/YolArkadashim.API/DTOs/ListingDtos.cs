@@ -6,6 +6,7 @@ public record LocationDto(double Lat, double Lng, string AddressText);
 
 public record CreateListingRequest(
     [Required, MaxLength(100)] string City,
+    string? District,
     [Required] LocationDto HomeLocation,
     [Required] LocationDto WorkLocation,
     [Required] TimeOnly MorningDepartTime,
@@ -23,6 +24,7 @@ public record ListingDto(
     string DriverName,
     string? DriverPhoto,
     string City,
+    string? District,
     bool DriverEmailVerified,
     bool DriverTcVerified,
     LocationDto HomeLocation,

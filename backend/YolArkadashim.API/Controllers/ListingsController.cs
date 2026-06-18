@@ -34,6 +34,7 @@ public class ListingsController(AppDbContext db, GoogleMapsService mapsService, 
         {
             UserId = CurrentUserId,
             City = request.City,
+            District = request.District,
             HomeLocation = homePoint,
             WorkLocation = workPoint,
             HomeAddressText = request.HomeLocation.AddressText,
@@ -87,6 +88,29 @@ public class ListingsController(AppDbContext db, GoogleMapsService mapsService, 
             .Include(l => l.User)
             .Where(l => l.UserId == CurrentUserId)
             .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync();
+
+        return Ok(listings.Select(l => ToDto(l, l.User, null, null)));
+    }
+
+    // Şehir/ilçe bazlı listeleme (rota gerekmez)
+    [HttpGet("by-city")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<ListingDto>>> ByCity([FromQuery] string? city, [FromQuery] string? district)
+    {
+        var query = db.Listings
+            .Include(l => l.User)
+            .Where(l => l.Status == ListingStatus.Active);
+
+        if (!string.IsNullOrWhiteSpace(city))
+            query = query.Where(l => l.City == city);
+
+        if (!string.IsNullOrWhiteSpace(district))
+            query = query.Where(l => l.District == district);
+
+        var listings = await query
+            .OrderByDescending(l => l.CreatedAt)
+            .Take(50)
             .ToListAsync();
 
         return Ok(listings.Select(l => ToDto(l, l.User, null, null)));
@@ -175,7 +199,7 @@ public class ListingsController(AppDbContext db, GoogleMapsService mapsService, 
     }
 
     private static ListingDto ToDto(Listing l, User u, double? homeDist, double? workDist) => new(
-        l.Id, l.UserId, u.FullName, u.ProfilePhoto, l.City,
+        l.Id, l.UserId, u.FullName, u.ProfilePhoto, l.City, l.District,
         u.IsEmailVerified, u.IsTcVerified,
         new LocationDto(l.HomeLocation.Y, l.HomeLocation.X, l.HomeAddressText),
         new LocationDto(l.WorkLocation.Y, l.WorkLocation.X, l.WorkAddressText),

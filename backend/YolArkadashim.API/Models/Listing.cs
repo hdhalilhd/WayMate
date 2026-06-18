@@ -42,6 +42,9 @@ public class Listing
     [MaxLength(100)]
     public string City { get; set; } = string.Empty;
 
+    [MaxLength(100)]
+    public string? District { get; set; }
+
     // Güzergahtan kaç metre sapma kabul edilir (100-1000m)
     public int DeviationRadiusMeters { get; set; } = 500;
 
