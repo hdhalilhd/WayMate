@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getUser, clearUser } from "@/lib/auth";
 import { Car, MessageSquare, Menu, X, Plus, Globe } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLangCtx } from "@/components/Providers";
 import { t } from "@/lib/i18n";
 import NotificationBell from "@/components/NotificationBell";
@@ -12,8 +12,13 @@ import NotificationBell from "@/components/NotificationBell";
 export default function Navbar() {
   const router = useRouter();
   const { lang, setLang } = useLangCtx();
-  const user = getUser();
   const [menuOpen, setMenuOpen] = useState(false);
+  // localStorage'a bağlı kullanıcı bilgisi yalnızca client'ta okunmalı —
+  // aksi halde sunucu (çıkış yapmış) ile client (giriş yapmış) HTML'i uyuşmaz
+  // ve hydration hatası "client-side exception" ekranına yol açar.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const user = mounted ? getUser() : null;
 
   function logout() { clearUser(); router.push("/"); }
 
