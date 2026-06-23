@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { MapPin, Search } from "lucide-react";
+import { MapPin } from "lucide-react";
 import type { LocationDto } from "@/types";
 
 interface Props {
@@ -10,6 +10,12 @@ interface Props {
   iconColor?: string;
   value: LocationDto | null;
   onChange: (loc: LocationDto) => void;
+}
+
+interface Suggestion {
+  display: string;
+  lat: number;
+  lng: number;
 }
 
 declare global {
@@ -42,9 +48,10 @@ async function loadGoogleMaps(): Promise<boolean> {
 
 export default function AddressInput({ label, placeholder, iconColor = "text-teal-500", value, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [inputValue, setInputValue] = useState(value?.addressText || "");
   const [mapsAvailable, setMapsAvailable] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const initAutocomplete = useCallback(async () => {
@@ -67,6 +74,7 @@ export default function AddressInput({ label, placeholder, iconColor = "text-tea
       };
       setInputValue(loc.addressText);
       setSuggestions([]);
+      setShowSuggestions(false);
       onChange(loc);
     });
   }, [onChange]);
@@ -75,45 +83,71 @@ export default function AddressInput({ label, placeholder, iconColor = "text-tea
     initAutocomplete();
   }, [initAutocomplete]);
 
-  // Google Maps yoksa manuel koordinat denemesi (Nominatim OpenStreetMap)
-  async function searchManual(query: string) {
-    if (query.length < 3) { setSuggestions([]); return; }
+  // Dışarıdan gelen değer değişince (örn. düzenleme modunda ilan yüklenince) input'u senkronla.
+  // value.addressText yalnızca seçim yapıldığında değiştiği için yazarken tetiklenmez.
+  useEffect(() => {
+    if (value?.addressText) setInputValue(value.addressText);
+  }, [value?.addressText]);
+
+  // Debounce temizliği
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current); }, []);
+
+  // Nominatim (OpenStreetMap) — Google çalışmadığında güvenlik ağı
+  async function searchNominatim(query: string) {
+    if (query.trim().length < 3) { setSuggestions([]); return; }
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ", Türkiye")}&format=json&limit=4&addressdetails=1`,
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query + ", Türkiye")}&format=json&limit=5&addressdetails=1`,
         { headers: { "Accept-Language": "tr" } }
       );
       const data = await res.json() as Array<{ display_name: string; lat: string; lon: string }>;
-      setSuggestions(data.map((d) => d.display_name));
-
-      // onChange'i ilk sonuçla çağır (en iyi eşleşme)
-      if (data.length > 0) {
-        onChange({
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon),
-          addressText: query,
-        });
-      }
-    } catch {}
-  }
-
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setInputValue(e.target.value);
-    if (!mapsAvailable) {
-      setShowSuggestions(true);
-      searchManual(e.target.value);
+      const mapped: Suggestion[] = data.map((d) => ({
+        display: d.display_name,
+        lat: parseFloat(d.lat),
+        lng: parseFloat(d.lon),
+      }));
+      setSuggestions(mapped);
+      setShowSuggestions(mapped.length > 0);
+    } catch {
+      /* ağ hatası — sessizce geç */
     }
   }
 
-  function selectSuggestion(s: string) {
-    setInputValue(s);
+  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const val = e.target.value;
+    setInputValue(val);
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (val.trim().length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(() => {
+      // Google yüklüyse ve kendi önerilerini gösteriyorsa (faturalandırma açık),
+      // bizim açılır listemizi gizle — çift liste olmasın.
+      if (mapsAvailable && document.querySelector(".pac-container .pac-item")) {
+        setSuggestions([]);
+        setShowSuggestions(false);
+        return;
+      }
+      // Google yok ya da öneri döndürmedi → Nominatim güvenlik ağı
+      searchNominatim(val);
+    }, 450);
+  }
+
+  function selectSuggestion(s: Suggestion) {
+    setInputValue(s.display);
     setSuggestions([]);
     setShowSuggestions(false);
+    onChange({ lat: s.lat, lng: s.lng, addressText: s.display });
   }
 
   return (
     <div className="relative">
-      <label className="label">{label}</label>
+      {label && <label className="label">{label}</label>}
       <div className="relative">
         <MapPin className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${iconColor}`} />
         <input
@@ -122,23 +156,14 @@ export default function AddressInput({ label, placeholder, iconColor = "text-tea
           value={inputValue}
           onChange={handleInputChange}
           onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 180)}
           placeholder={placeholder || "Adres ara..."}
           className="input pl-10"
           autoComplete="off"
         />
-        {!mapsAvailable && inputValue.length > 2 && (
-          <button
-            type="button"
-            onClick={() => searchManual(inputValue)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-teal-500"
-          >
-            <Search className="w-4 h-4" />
-          </button>
-        )}
       </div>
 
-      {/* Suggestions dropdown (Nominatim fallback) */}
+      {/* Öneri açılır listesi (Nominatim güvenlik ağı) */}
       {showSuggestions && suggestions.length > 0 && (
         <div className="absolute z-50 left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
           {suggestions.map((s, i) => (
@@ -149,16 +174,10 @@ export default function AddressInput({ label, placeholder, iconColor = "text-tea
               className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-teal-50 hover:text-teal-700 flex items-start gap-2 border-b border-gray-50 last:border-0"
             >
               <MapPin className="w-3.5 h-3.5 text-gray-400 mt-0.5 shrink-0" />
-              <span className="line-clamp-2">{s}</span>
+              <span className="line-clamp-2">{s.display}</span>
             </button>
           ))}
         </div>
-      )}
-
-      {!mapsAvailable && (
-        <p className="text-xs text-amber-600 mt-1 flex items-center gap-1">
-          <span>⚠</span> Google Maps API key girilmemiş — OpenStreetMap kullanılıyor.
-        </p>
       )}
     </div>
   );

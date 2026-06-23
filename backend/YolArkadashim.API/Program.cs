@@ -66,6 +66,10 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<NviService>();
 builder.Services.AddHttpClient("nvi", c => c.Timeout = TimeSpan.FromSeconds(20));
 
+// Render uyku sorununa karşı self-ping (keep-alive)
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<KeepAliveService>();
+
 // CORS — geliştirme + prodüksiyon origin'leri
 // Prodüksiyonda Cors:AllowedOrigins ortam değişkeninden virgülle ayrılmış liste okunur
 // (örn. Cors__AllowedOrigins = "https://www.waymate.com.tr,https://waymate.com.tr")

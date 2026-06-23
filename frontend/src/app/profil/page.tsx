@@ -166,6 +166,16 @@ export default function ProfilPage() {
     setSearches((prev) => prev.filter((s) => s.id !== id));
   }
 
+  async function deleteListing(id: string) {
+    if (!confirm("Bu ilanı kalıcı olarak silmek istediğine emin misin? Bu işlem geri alınamaz.")) return;
+    try {
+      await api.delete(`/listings/${id}`);
+      setListings((prev) => prev.filter((l) => l.id !== id));
+    } catch {
+      alert("İlan silinemedi. Lütfen tekrar deneyin.");
+    }
+  }
+
   function logout() { clearUser(); router.push("/"); }
 
   if (loading) {
@@ -589,17 +599,30 @@ export default function ProfilPage() {
 
                       <div className="flex gap-2 pt-3 border-t border-gray-50">
                         <Link
+                          href={`/ilan-olustur?edit=${l.id}`}
+                          className="flex-1 text-center text-sm py-2 border border-gray-200 rounded-lg text-gray-600 hover:border-teal-300 hover:text-teal-600 transition-colors font-medium flex items-center justify-center gap-1.5"
+                        >
+                          <Pencil className="w-3.5 h-3.5" /> Düzenle
+                        </Link>
+                        <Link
                           href={`/ilan?id=${l.id}`}
                           className="flex-1 text-center text-sm py-2 border border-gray-200 rounded-lg text-gray-600 hover:border-teal-300 hover:text-teal-600 transition-colors font-medium"
                         >
-                          İlanı Gör
+                          Gör
                         </Link>
                         <Link
                           href="/mesajlar"
                           className="flex-1 text-center text-sm py-2 bg-teal-50 rounded-lg text-teal-700 hover:bg-teal-100 transition-colors font-medium"
                         >
-                          Gelen İstekler
+                          İstekler
                         </Link>
+                        <button
+                          onClick={() => deleteListing(l.id)}
+                          className="shrink-0 px-3 py-2 border border-red-200 text-red-500 rounded-lg hover:bg-red-50 transition-colors"
+                          title="İlanı sil"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   ))

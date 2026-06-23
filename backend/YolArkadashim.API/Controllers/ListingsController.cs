@@ -153,6 +153,55 @@ public class ListingsController(AppDbContext db, GoogleMapsService mapsService, 
         }));
     }
 
+    // İlanı düzenle (sadece sahibi)
+    [HttpPut("{id:guid}")]
+    public async Task<ActionResult<ListingDto>> Update(Guid id, CreateListingRequest request)
+    {
+        var listing = await db.Listings
+            .Include(l => l.User)
+            .FirstOrDefaultAsync(l => l.Id == id && l.UserId == CurrentUserId);
+        if (listing is null) return NotFound();
+
+        var homePoint = MakePoint(request.HomeLocation.Lng, request.HomeLocation.Lat);
+        var workPoint = MakePoint(request.WorkLocation.Lng, request.WorkLocation.Lat);
+
+        listing.City = request.City;
+        listing.District = request.District;
+        listing.HomeLocation = homePoint;
+        listing.WorkLocation = workPoint;
+        listing.HomeAddressText = request.HomeLocation.AddressText;
+        listing.WorkAddressText = request.WorkLocation.AddressText;
+        listing.MorningDepartTime = request.MorningDepartTime;
+        listing.EveningDepartTime = request.EveningDepartTime;
+        listing.FlexibilityNote = request.FlexibilityNote;
+        listing.FlexibilityDaysPct = request.FlexibilityDaysPct;
+        listing.PricePerTrip = request.PricePerTrip;
+        listing.AvailableSeats = request.AvailableSeats;
+        listing.DeviationRadiusMeters = request.DeviationRadiusMeters;
+
+        // Güzergah değişmiş olabilir — polyline'ı yeniden hesapla
+        try
+        {
+            listing.RoutePolyline = await mapsService.GetRoutePolylineAsync(homePoint, workPoint);
+        }
+        catch { /* Rota hesaplanamazsa eski hâliyle devam */ }
+
+        await db.SaveChangesAsync();
+        return Ok(ToDto(listing, listing.User, null, null));
+    }
+
+    // İlanı kalıcı olarak sil (sadece sahibi)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var listing = await db.Listings.FirstOrDefaultAsync(l => l.Id == id && l.UserId == CurrentUserId);
+        if (listing is null) return NotFound();
+
+        db.Listings.Remove(listing);
+        await db.SaveChangesAsync();
+        return NoContent();
+    }
+
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] string status)
     {

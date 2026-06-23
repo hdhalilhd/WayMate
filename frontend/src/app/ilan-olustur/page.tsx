@@ -1,19 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import api from "@/lib/api";
 import AddressInput from "@/components/AddressInput";
-import type { LocationDto } from "@/types";
+import type { LocationDto, ListingDto } from "@/types";
 import { Clock, Users, ArrowLeft, CheckCircle } from "lucide-react";
 import RouteMap from "@/components/RouteMap";
 import CitySelect from "@/components/CitySelect";
+import { DISTRICTS } from "@/lib/districts";
 
 export default function IlanOlusturPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [city, setCity] = useState("");
+  const [district, setDistrict] = useState("");
   const [home, setHome] = useState<LocationDto | null>(null);
   const [work, setWork] = useState<LocationDto | null>(null);
   const [routeInfo, setRouteInfo] = useState<{ distanceKm: number; durationMin: number } | null>(null);
@@ -29,6 +31,29 @@ export default function IlanOlusturPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+
+  // Düzenleme modu: ?edit=<id> ile gelen ilanı yükle ve formu doldur
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("edit");
+    if (!id) return;
+    setEditId(id);
+    api.get<ListingDto>(`/listings/${id}`).then(({ data }) => {
+      setCity(data.city);
+      setDistrict(data.district ?? "");
+      setHome(data.homeLocation);
+      setWork(data.workLocation);
+      setForm({
+        morningDepartTime: data.morningDepartTime.slice(0, 5),
+        eveningDepartTime: data.eveningDepartTime.slice(0, 5),
+        flexibilityNote: data.flexibilityNote ?? "",
+        flexibilityDaysPct: data.flexibilityDaysPct,
+        monthlyPrice: Math.round(data.pricePerTrip * 22),
+        availableSeats: data.availableSeats,
+        deviationRadiusMeters: data.deviationRadiusMeters,
+      });
+    }).catch(() => setError("İlan yüklenemedi. Düzenleme için tekrar deneyin."));
+  }, []);
 
   function nextStep() {
     if (step === 1 && !city) {
@@ -43,22 +68,41 @@ export default function IlanOlusturPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(""); setLoading(true);
+    const payload = {
+      city,
+      district: district || null,
+      homeLocation: home,
+      workLocation: work,
+      morningDepartTime: form.morningDepartTime,
+      eveningDepartTime: form.eveningDepartTime,
+      flexibilityNote: form.flexibilityNote || null,
+      flexibilityDaysPct: Number(form.flexibilityDaysPct),
+      pricePerTrip: Math.round((Number(form.monthlyPrice) / 22) * 100) / 100,
+      availableSeats: Number(form.availableSeats),
+      deviationRadiusMeters: Number(form.deviationRadiusMeters),
+    };
     try {
-      await api.post("/listings", {
-        city,
-        homeLocation: home,
-        workLocation: work,
-        morningDepartTime: form.morningDepartTime,
-        eveningDepartTime: form.eveningDepartTime,
-        flexibilityNote: form.flexibilityNote || null,
-        flexibilityDaysPct: Number(form.flexibilityDaysPct),
-        pricePerTrip: Math.round((Number(form.monthlyPrice) / 22) * 100) / 100,
-        availableSeats: Number(form.availableSeats),
-        deviationRadiusMeters: Number(form.deviationRadiusMeters),
-      });
+      if (editId) {
+        await api.put(`/listings/${editId}`, payload);
+      } else {
+        await api.post("/listings", payload);
+      }
       setDone(true);
-    } catch {
-      setError("İlan oluşturulamadı. Giriş yaptığınızdan emin olun.");
+    } catch (err) {
+      const ax = err as { response?: { status?: number; data?: { message?: string } }; code?: string };
+      const status = ax.response?.status;
+      const backendMsg = ax.response?.data?.message;
+      if (status === 409) {
+        setError(backendMsg || "Zaten yayında bir ilanınız var. Yeni ilan vermek için önce Profil sayfanızdan mevcut ilanınızı kapatın.");
+      } else if (status === 401) {
+        setError("Oturumunuz sona ermiş görünüyor. Lütfen çıkış yapıp tekrar giriş yapın.");
+      } else if (status === 400) {
+        setError(backendMsg || "Girdiğiniz bilgilerde bir eksik/hata var. Lütfen kontrol edip tekrar deneyin.");
+      } else if (!status || ax.code === "ECONNABORTED" || ax.code === "ERR_NETWORK") {
+        setError("Sunucuya ulaşılamadı. Sunucu uyanıyor olabilir, lütfen birkaç saniye sonra tekrar deneyin.");
+      } else {
+        setError(backendMsg || "İlan oluşturulamadı. Lütfen daha sonra tekrar deneyin.");
+      }
     } finally {
       setLoading(false);
     }
@@ -71,18 +115,24 @@ export default function IlanOlusturPage() {
           <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-5">
             <CheckCircle className="w-8 h-8 text-teal-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">İlanın Yayında!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {editId ? "İlanın Güncellendi!" : "İlanın Yayında!"}
+          </h2>
           <p className="text-gray-500 text-sm mb-8">
-            İlanın yayınlandı. Araç arayanlar seninle iletişime geçebilir.
+            {editId
+              ? "Değişiklikler kaydedildi. İlanın güncel hâliyle yayında."
+              : "İlanın yayınlandı. Araç arayanlar seninle iletişime geçebilir."}
           </p>
           <div className="flex flex-col gap-3">
-            <button onClick={() => router.push("/mesajlar")} className="btn-primary w-full">
-              Mesajlarıma Git
+            <button onClick={() => router.push("/profil")} className="btn-primary w-full">
+              İlanlarıma Git
             </button>
-            <button onClick={() => { setDone(false); setStep(1); setHome(null); setWork(null); }}
-              className="btn-outline w-full text-sm">
-              Yeni İlan Ver
-            </button>
+            {!editId && (
+              <button onClick={() => { setDone(false); setStep(1); setHome(null); setWork(null); }}
+                className="btn-outline w-full text-sm">
+                Yeni İlan Ver
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -97,7 +147,7 @@ export default function IlanOlusturPage() {
           <Link href="/" className="text-gray-400 hover:text-teal-600 transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-bold text-gray-900">İlan Ver</h1>
+          <h1 className="font-bold text-gray-900">{editId ? "İlanı Düzenle" : "İlan Ver"}</h1>
         </div>
       </div>
 
@@ -139,9 +189,22 @@ export default function IlanOlusturPage() {
               </p>
             </div>
 
-            <div>
-              <label className="label">Şehir</label>
-              <CitySelect value={city} onChange={setCity} placeholder="Şehir seç..." required />
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="label">Şehir</label>
+                <CitySelect value={city} onChange={(v) => { setCity(v); setDistrict(""); }} placeholder="Şehir seç..." required />
+              </div>
+              {(DISTRICTS[city]?.length ?? 0) > 0 && (
+                <div>
+                  <label className="label">İlçe <span className="text-gray-400 font-normal">(isteğe bağlı)</span></label>
+                  <select value={district} onChange={(e) => setDistrict(e.target.value)} className="input">
+                    <option value="">İlçe seç...</option>
+                    {DISTRICTS[city].map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
             <AddressInput
@@ -353,7 +416,9 @@ export default function IlanOlusturPage() {
                 ← Geri
               </button>
               <button type="submit" disabled={loading} className="btn-primary flex-1">
-                {loading ? "Yayınlanıyor..." : "İlanı Yayınla 🚀"}
+                {loading
+                  ? (editId ? "Kaydediliyor..." : "Yayınlanıyor...")
+                  : (editId ? "Değişiklikleri Kaydet" : "İlanı Yayınla 🚀")}
               </button>
             </div>
           </form>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import AddressInput from "@/components/AddressInput";
@@ -36,12 +36,11 @@ export default function IlanlarPage() {
 
   const availableDistricts = city ? (DISTRICTS[city] ?? []) : [];
 
-  async function searchByCity(e: React.FormEvent) {
-    e.preventDefault();
+  async function doCitySearch(cityVal: string, districtVal: string) {
     setSearching(true);
     try {
       const { data } = await api.get<ListingDto[]>("/listings/by-city", {
-        params: { city: city || undefined, district: district || undefined },
+        params: { city: cityVal || undefined, district: districtVal || undefined },
       });
       setListings(data);
       setSearched(true);
@@ -49,6 +48,36 @@ export default function IlanlarPage() {
       setSearching(false);
     }
   }
+
+  function searchByCity(e: React.FormEvent) {
+    e.preventDefault();
+    doCitySearch(city, district);
+  }
+
+  // Anasayfadan gelen URL parametrelerini oku ve otomatik arama yap
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const urlMode = sp.get("mode");
+    const urlCity = sp.get("city") ?? "";
+    const urlDistrict = sp.get("district") ?? "";
+    const urlAll = sp.get("all");
+
+    if (urlMode === "nearby") {
+      searchNearby();
+      return;
+    }
+    if (urlMode === "route") {
+      setMode("route");
+      return;
+    }
+    if (urlCity || urlDistrict || urlAll) {
+      setMode("city");
+      setCity(urlCity);
+      setDistrict(urlDistrict);
+      doCitySearch(urlCity, urlDistrict);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function searchByRoute(e: React.FormEvent) {
     e.preventDefault();
