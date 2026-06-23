@@ -14,6 +14,18 @@ public record UserProfileDto(
     DateTime CreatedAt
 );
 
+// Herkese açık profil — e-posta/telefon/TC GİZLİ
+public record PublicProfileDto(
+    string Id,
+    string FullName,
+    string? ProfilePhoto,
+    bool IsVerified,
+    bool IsEmailVerified,
+    bool IsTcVerified,
+    DateTime CreatedAt,
+    int ActiveListingCount
+);
+
 public record VerifyEmailRequest(
     [Required, MaxLength(6)] string Code
 );

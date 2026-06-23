@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using YolArkadashim.API.Data;
 using YolArkadashim.API.DTOs;
 using YolArkadashim.API.Models;
@@ -26,6 +27,23 @@ public class UsersController(AppDbContext db, EmailService emailService, NviServ
         var user = await db.Users.FindAsync(CurrentUserId);
         if (user is null) return NotFound();
         return Ok(ToDto(user));
+    }
+
+    // Herkese açık profil (ilan verenin bilgileri) — hassas alanlar gizli
+    [HttpGet("{id:guid}/public")]
+    [AllowAnonymous]
+    public async Task<ActionResult<PublicProfileDto>> GetPublicProfile(Guid id)
+    {
+        var user = await db.Users.FindAsync(id);
+        if (user is null) return NotFound();
+
+        var activeCount = await db.Listings
+            .CountAsync(l => l.UserId == id && l.Status == ListingStatus.Active);
+
+        return Ok(new PublicProfileDto(
+            user.Id.ToString(), user.FullName, user.ProfilePhoto,
+            user.IsVerified, user.IsEmailVerified, user.IsTcVerified,
+            user.CreatedAt, activeCount));
     }
 
     [HttpPut("me")]

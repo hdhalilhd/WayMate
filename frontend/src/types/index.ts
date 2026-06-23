@@ -35,6 +35,17 @@ export interface ListingDto {
   workDistanceMeters?: number;
 }
 
+export interface PublicProfileDto {
+  id: string;
+  fullName: string;
+  profilePhoto?: string;
+  isVerified: boolean;
+  isEmailVerified: boolean;
+  isTcVerified: boolean;
+  createdAt: string;
+  activeListingCount: number;
+}
+
 export interface MatchRequestDto {
   id: string;
   listingId: string;

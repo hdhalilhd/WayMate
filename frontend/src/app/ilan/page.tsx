@@ -6,7 +6,7 @@ import Link from "next/link";
 import api from "@/lib/api";
 import { getUser } from "@/lib/auth";
 import type { ListingDto, MatchRequestDto } from "@/types";
-import { MapPin, Clock, Users, Car, ArrowLeft, MessageSquare, Star, CheckCircle, Flag } from "lucide-react";
+import { MapPin, Clock, Users, Car, ArrowLeft, MessageSquare, Star, CheckCircle, Flag, CalendarDays, ChevronRight } from "lucide-react";
 import VerifiedBadges from "@/components/VerifiedBadges";
 import ReportModal from "@/components/ReportModal";
 
@@ -80,12 +80,12 @@ function IlanDetayInner() {
 
             {/* Driver Card */}
             <div className="card p-6">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-2xl">
+              <Link href={`/kullanici?id=${listing.userId}`} className="flex items-center gap-4 mb-6 group">
+                <div className="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-2xl group-hover:bg-teal-200 transition-colors shrink-0">
                   {listing.driverName[0]}
                 </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">{listing.driverName}</h1>
+                <div className="min-w-0">
+                  <h1 className="text-xl font-bold text-gray-900 group-hover:text-teal-700 transition-colors truncate">{listing.driverName}</h1>
                   <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                     <VerifiedBadges email={listing.driverEmailVerified} tc={listing.driverTcVerified} size="md" />
                     <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
@@ -96,8 +96,11 @@ function IlanDetayInner() {
                       {listing.status === "Active" ? "İlan Aktif" : "Pasif"}
                     </span>
                   </div>
+                  <p className="text-xs text-teal-600 mt-1.5 font-medium flex items-center gap-0.5">
+                    Profili gör <ChevronRight className="w-3.5 h-3.5" />
+                  </p>
                 </div>
-              </div>
+              </Link>
 
               {/* Route */}
               <div className="relative pl-6 space-y-4 border-l-2 border-dashed border-gray-200 ml-2">
@@ -111,6 +114,12 @@ function IlanDetayInner() {
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Nereye</p>
                   <p className="text-gray-800 font-medium">{listing.workLocation.addressText}</p>
                 </div>
+              </div>
+
+              {/* İlan tarihi */}
+              <div className="mt-5 pt-4 border-t border-gray-50 flex items-center gap-1.5 text-xs text-gray-400">
+                <CalendarDays className="w-3.5 h-3.5" />
+                {new Date(listing.createdAt).toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })} tarihinde yayınlandı
               </div>
             </div>
 

@@ -116,6 +116,20 @@ public class ListingsController(AppDbContext db, GoogleMapsService mapsService, 
         return Ok(listings.Select(l => ToDto(l, l.User, null, null)));
     }
 
+    // Bir kullanıcının aktif ilanları (herkese açık profil için)
+    [HttpGet("by-user/{userId:guid}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<List<ListingDto>>> ByUser(Guid userId)
+    {
+        var listings = await db.Listings
+            .Include(l => l.User)
+            .Where(l => l.UserId == userId && l.Status == ListingStatus.Active)
+            .OrderByDescending(l => l.CreatedAt)
+            .ToListAsync();
+
+        return Ok(listings.Select(l => ToDto(l, l.User, null, null)));
+    }
+
     // PostGIS ile rota buffer eşleştirme sorgusu
     [HttpGet("search")]
     [AllowAnonymous]
